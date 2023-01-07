@@ -8,18 +8,18 @@
 
 using namespace std;
 
-bool check_bracket(char inp[]){
+bool check_bracket(char inp[]) {
 
-    stack<char> s;   
+    stack<char> s;
     int i = 0;
-    while(inp[i] != '\0'){
-        
-        if(inp[i] == '('){
+    while (inp[i] != '\0') {
+
+        if (inp[i] == '(') {
             s.push(inp[i]);
         }
-        
-        if(inp[i] == ')'){
-            if(s.empty()){
+
+        if (inp[i] == ')') {
+            if (s.empty()) {
                 return 0;
             }
             s.pop();
@@ -28,153 +28,201 @@ bool check_bracket(char inp[]){
         i++;
     }
 
-    if(!s.empty()){
+    if (!s.empty()) {
         return 0;
     }
     return 1;
 
 }
 
-int postfix(char inp[]){
+bool check_operator(char inp[]) {
+
+    int i = 0;
+    if (inp[i] == '+' || inp[i] == '-' || inp[i] == '*' || inp[i] == '/') {
+        return 0;
+    }
+
+    stack<char> s;
+    
+    while (inp[i] != '\0') {
+        
+        if (inp[i] != '(' && inp[i] != ')' && inp[i] != '+' && inp[i] != '-' && inp[i] != '*' && inp[i] != '/' && inp[i] != ' ') {
+            s.push(inp[i]);
+            i++;
+        }
+        else if (inp[i] == '+' || inp[i] == '-' || inp[i] == '*' || inp[i] == '/') {
+            if (s.top() == '+' || s.top() == '-' || s.top() == '*' || s.top() == '/'){
+                return 0;
+            }
+            s.push(inp[i]);
+            i++;
+        }
+        else {
+            i++;
+        }
+        
+
+    }
+
+    return 1;
+
+}
+
+int postfix(char inp[]) {
 
     stack<char> s;
     queue<char> q;
-    int i = 0;
-    while(inp[i] != '\0'){
 
-        if(inp[i] != '(' && inp[i] != ')' && inp[i] != '+' && inp[i] != '-' && inp[i] != '*' && inp[i] != '/' && inp[i] != ' '){
+    int i = 0;
+     
+    while (inp[i] != '\0') {
+
+        if (inp[i] != '(' && inp[i] != ')' && inp[i] != '+' && inp[i] != '-' && inp[i] != '*' && inp[i] != '/' && inp[i] != ' ') {
             q.push(inp[i]);
         }
+
+        if (inp[i] == '+' || inp[i] == '-' || inp[i] == '*' || inp[i] == '/') {
+
+            if (s.empty()) {
+                q.push(' ');
+                s.push(inp[i]);
+            }
+            else if (s.top() == '(') {
+                q.push(' ');
+                s.push(inp[i]);
+            }
+            else if (s.top() == '+' || s.top() == '-') {
+
+                if (inp[i] == '*' || inp[i] == '/') {
+                    q.push(' ');
+                    s.push(inp[i]);
+                }
+
+                if (inp[i] == '+' || inp[i] == '-') {
+                  
+                    while (!s.empty()) {
+                        if (s.top() == '(') {
+                            break;
+                        }
+                 
+                        q.push(' ');
+                        q.push(s.top());
+                        q.push(' ');
+                        s.pop();
+                    }
+                    s.push(' ');
+                    s.push(inp[i]);
+                }
+
+            }
+            else if (s.top() == '*' || s.top() == '/') {
+
+                while (!s.empty()) {
+                    if (s.top() == '(') {
+                        break;
+                    }
+                    q.push(' ');
+                    q.push(s.top());
+                    q.push(' ');
+                    s.pop();
+                }
+                s.push(inp[i]);
+                   
         
-        if(inp[i] == '+' || inp[i] == '-' || inp[i] == '*' || inp[i] == '/'){
-
-            if (s.empty()){
-                s.push(inp[i]);
-            }        
-            else if(s.top() == '('){
-                s.push(inp[i]);
             }
-            else if(s.top() == '+' || s.top() == '-'){
-
-                if(inp[i] == '*' || inp[i] == '/'){
-                    s.push(inp[i]);
-                }
-
-                if(inp[i] == '+' || inp[i] == '-'){
-                    while(!s.empty()){
-                        if(s.top() == '('){
-                            break;
-                        }
-                        q.push(s.top());
-                        s.pop();
-                   }
-                    s.push(inp[i]);
-                }
-            
-            }
-            else if(s.top() == '*' || s.top() == '/'){
-                if(inp[i] == '+' || inp[i] == '-'){
-                    s.push(inp[i]);
-                }
-
-                if(inp[i] == '*' || inp[i] == '/'){
-                    while(!s.empty()){
-                        if(s.top() == '('){
-                            break;
-                        }
-                        q.push(s.top());
-                        s.pop();
-                   }
-                    s.push(inp[i]);
-                }
-
-            }
-            
 
         }
 
-        if(inp[i] == '('){
+        if (inp[i] == '(') {
             s.push(inp[i]);
         }
 
-        if(inp[i] == ')'){
-            
+        if (inp[i] == ')') {
+
             char ch = s.top();
             s.pop();
-            while(ch != '('){
+            while (ch != '(') {
+                q.push(' ');
                 q.push(ch);
                 ch = s.top();
                 s.pop();
             }
+            
         }
+
         i++;
     }
 
-    while(!s.empty()){
+    while (!s.empty()) {
+        q.push(' ');
         q.push(s.top());
         s.pop();
     }
-    
-    stack<string> s1;
-    queue<string> q1;
 
-    while(!q.empty()){
-        string k;
-        stringstream ss;
-        ss << q.front();
-        ss >> k;
+    string k;
+
+    while (!q.empty()) {
+        k += q.front();
         q.pop();
-        q1.push(k);
     }
 
-
-    int result = 0;
-
-
-    while(!q1.empty()){
-
-        string ch = q1.front();
-        q1.pop();
+    stack<int> s1;
+    
+    for (int i = 0; i < k.size(); i++) {
         
-        if(ch != "+" && ch != "-" && ch != "*" && ch != "/"){
-            s1.push(ch);
-        }   
-        else if(ch == "+" || ch == "-" || ch == "*" || ch == "/"){
 
-            if(ch == "+"){
-                
-                string ch1 = s1.top();
-                cout << ch1;
-                stringstream ss;
-                int number1;
-                ss << ch1;
-                ss >> number1;
-                
-                s1.pop();
-                
-                string ch2 = s1.top();
-                int number2 = stoi(ch2);
-                s1.pop();
+        if (k[i] == ' ') continue;
 
-                result = number1 + number2;
-                string ch3 = to_string(result);
-                s1.push(ch3);                
-                
+        else if (isdigit(k[i]))
+        {
+            int num = 0;
+
+            //extract full number
+            while (isdigit(k[i]))
+            {
+                num = num * 10 + (int)(k[i] - '0');
+                i++;
             }
-        }        
+            i--;
+
+            s1.push(num);
+            
+        }
+        else
+        {
+            int val1 = s1.top(); s1.pop();
+
+            int val2 = s1.top(); s1.pop();
+
+            switch (k[i])
+            {
+            case '+': s1.push(val2 + val1); break;
+            case '-': s1.push(val2 - val1); break;
+            case '*': s1.push(val2 * val1); break;
+            case '/': s1.push(val2 / val1); break;
+
+            }
+        }
 
     }
-
-    return result;
+    
+    return s1.top();
 
 }
 
 
-int main(){
+
+
+int main() {
 
     char inp[2000];
     cin.getline(inp, sizeof(inp));
-    postfix(inp);   
+    if (check_bracket(inp) == 1 && check_operator(inp) == 1) {
+        cout << postfix(inp);
+    }
+    else {
+        cout << "Invalid mathematical expression ";
+    }
 
     return 0;
 }
